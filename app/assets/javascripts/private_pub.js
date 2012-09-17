@@ -16,6 +16,7 @@ function buildPrivatePub(doc) {
           var script = doc.createElement("script");
           script.type = "text/javascript";
           script.src = self.subscriptions.server + ".js";
+          if($.browser.msie)
           {
             var done = false;
             script.onload = script.onreadystatechange = function(){
@@ -26,6 +27,11 @@ function buildPrivatePub(doc) {
                 script.onload = script.onreadystatechange = null;
               }
             }
+          }
+          else
+          {
+            script.onload = self.connectToFaye;
+            doc.documentElement.appendChild(script);
           }
         }
       }
