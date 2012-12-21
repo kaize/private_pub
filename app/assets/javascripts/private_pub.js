@@ -12,27 +12,11 @@ function buildPrivatePub(doc) {
       } else {
         self.fayeCallbacks.push(callback);
         if (self.subscriptions.server && !self.connecting) {
-          self.connecting = true;
-          var script = doc.createElement("script");
-          script.type = "text/javascript";
-          script.src = self.subscriptions.server + ".js";
-          if($.browser.msie)
-          {
-            var done = false;
-            script.onload = script.onreadystatechange = function(){
-              if(!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
-                done = true;
-                doc.documentElement.appendChild(script);
-                self.connectToFaye();
-                script.onload = script.onreadystatechange = null;
-              }
-            }
-          }
-          else
-          {
-            script.onload = self.connectToFaye;
-            doc.documentElement.appendChild(script);
-          }
+          var script_src = self.subscriptions.server + ".js";
+          $.getScript(script_src, function(data, textStatus, jqxhr) {
+            self.connectToFaye();
+            self.connecting = true;
+          });
         }
       }
     },
@@ -42,7 +26,7 @@ function buildPrivatePub(doc) {
       self.fayeClient.addExtension(self.fayeExtension);
       for (var i=0; i < self.fayeCallbacks.length; i++) {
         self.fayeCallbacks[i](self.fayeClient);
-      };
+      }
     },
 
     fayeExtension: {
