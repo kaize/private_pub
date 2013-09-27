@@ -6,18 +6,28 @@ function buildPrivatePub(doc) {
     subscriptions: {},
     subscriptionCallbacks: {},
 
+    canDownloadFayeJS: function(){
+        return self.subscriptions.server && !self.connecting && !self.vaiting_faye_js_download;
+    },
+
+    downloadFayeJS: function(){
+      if (self.canDownloadFayeJS()) {
+        var script_src = self.subscriptions.server + ".js";
+        self.vaiting_faye_js_download = true;
+        $.getScript(script_src, function(data, textStatus, jqxhr) {
+          self.connectToFaye();
+          self.connecting = true;
+          self.vaiting_faye_js_download = false;
+        });
+      }
+    },
+
     faye: function(callback) {
       if (self.fayeClient) {
         callback(self.fayeClient);
       } else {
         self.fayeCallbacks.push(callback);
-        if (self.subscriptions.server && !self.connecting) {
-          var script_src = self.subscriptions.server + ".js";
-          $.getScript(script_src, function(data, textStatus, jqxhr) {
-            self.connectToFaye();
-            self.connecting = true;
-          });
-        }
+        self.downloadFayeJS();
       }
     },
 
